@@ -18,6 +18,8 @@ class OverlayWriter
   def self.open(prefix)
     handle = new(prefix)
 
+    return handle unless block_given?
+
     begin
       yield handle
     ensure
