@@ -37,7 +37,7 @@ class OverlayWriter
       to_write = end_addr - start_addr + 1
       # Make a new overlay file if the current one is full _or_ the next
       # segment is <= 4 bytes and won't fit (to avoid splitting INITAD)
-      new_overlay unless room_for?(to_write > 4 ? 1 : to_write)
+      new_overlay unless room_for?(to_write <= 4 ? to_write : 1)
       len = room_for?(to_write) ? to_write : room_for
       write_segment(start_addr, start_addr + len - 1, stream.read(len))
       start_addr += len
