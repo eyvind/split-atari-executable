@@ -1,12 +1,13 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+MAX_SIZE = 8192
+HEADER_SIZE = 4
+
 ##
 # This class writes Atari DOS file segments into files no larger
 # than 8192 bytes while still preserving the object file format.
 class OverlayWriter
-  MAX_SIZE = 8192
-
   attr_reader :count
 
   def initialize(prefix)
@@ -34,6 +35,8 @@ class OverlayWriter
   def write(start_addr, end_addr, stream)
     while start_addr <= end_addr
       to_write = end_addr - start_addr + 1
+      # Make a new overlay file if the current one is full _or_ the next
+      # segment is <= 4 bytes and won't fit (to avoid splitting INITAD)
       new_overlay unless room_for?(to_write > 4 ? 1 : to_write)
       len = room_for?(to_write) ? to_write : room_for
       write_segment(start_addr, start_addr + len - 1, stream.read(len))
@@ -62,7 +65,7 @@ class OverlayWriter
   ##
   # Calculate how much room is left in the file minus a segment header.
   def room_for
-    @fh.nil? ? 0 : MAX_SIZE - @fh.pos - 4
+    @fh.nil? ? 0 : MAX_SIZE - @fh.pos - HEADER_SIZE
   end
 
   def write_segment(start_addr, end_addr, data)
@@ -89,7 +92,7 @@ File.open(filename, 'rb') do |f|
   OverlayWriter.open(prefix) do |of|
     count = 0
     loop do
-      header = f.read(4)
+      header = f.read(HEADER_SIZE)
       break if header.nil?
 
       start_addr, end_addr = header.unpack('S<S<')
