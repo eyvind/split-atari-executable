@@ -95,7 +95,7 @@ File.open(filename, 'rb') do |f|
       start_addr, end_addr = header.unpack('S<S<')
       if start_addr == 0xffff
         start_addr = end_addr
-        end_addr = header.unpack('S<')
+        end_addr = f.read(2).unpack('S<')
       end
       count += 1
       puts "Segment #{count}: " \
