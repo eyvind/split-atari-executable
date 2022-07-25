@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-MAX_SIZE = 8192
+MAX_SIZE = 8176
 HEADER_SIZE = 4
 
 ##
