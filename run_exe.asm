@@ -50,7 +50,7 @@ open_file
 	mwa #fname ICBAL,x
 	lda #OPEN
 	sta ICCOM,x
-	lda #$44
+	lda #$64
 	sta ICAX1,x
 	lda #$02
 	sta ICAX2,x
