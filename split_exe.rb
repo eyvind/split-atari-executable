@@ -5,8 +5,8 @@ MAX_SIZE = 8192
 HEADER_SIZE = 4
 
 ##
-# This class writes Atari DOS file segments into files no larger
-# than 8192 bytes while still preserving the object file format.
+# This class writes segments from an Atari binary load file into a
+# sequence of binary load files, each no larger than MAX_SIZE bytes.
 class OverlayWriter
   attr_reader :count
 
@@ -35,8 +35,8 @@ class OverlayWriter
   def write(start_addr, end_addr, stream)
     while start_addr <= end_addr
       to_write = end_addr - start_addr + 1
-      # Make a new overlay file if the current one is full _or_ the next
-      # segment is <= 4 bytes and won't fit (to avoid splitting INITAD)
+      # Avoid a split INITAD by forcing a new overlay file early if the
+      # current segment is <= 4 bytes and won't fit in the current file.
       new_overlay unless room_for?(to_write <= 4 ? to_write : 1)
       len = room_for?(to_write) ? to_write : room_for
       write_segment(start_addr, start_addr + len - 1, stream.read(len))
@@ -62,8 +62,6 @@ class OverlayWriter
     size <= room_for
   end
 
-  ##
-  # Calculate how much room is left in the file minus a segment header.
   def room_for
     @fh.nil? ? 0 : MAX_SIZE - @fh.pos - HEADER_SIZE
   end
@@ -86,7 +84,7 @@ prefix = ARGV[1] || filename.chomp(File.extname(filename))
 
 File.open(filename, 'rb') do |f|
   if f.read(2).unpack('S<') != [0xffff]
-    puts 'Not an Atari DOS object file!'
+    puts "#{filename} is not an Atari DOS binary load file!"
     exit 1
   end
   OverlayWriter.open(prefix) do |of|
