@@ -123,9 +123,9 @@ read_address
 	sta ICCOM,x
 	jmp CIOV
 
-num_files = 3
+num_files = X
 errmess	.byte 'Error loading '
-fname	.byte 'D:FNCONF'
+fname	.byte 'D:PART'
 index	.byte '0.OVL',$9B
 messend	.byte 0
 buffer	.ds 2
